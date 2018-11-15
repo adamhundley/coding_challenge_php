@@ -4,7 +4,13 @@ namespace PokerHand;
 
 class PokerHand
 {
-    const CARD_ORDER = [ 'A', 'K', 'Q', 'J', '10', '9', '8', '7', '6', '5', '4', '3', '2' ];
+    const CARD_ORDER = [ '14', '13', '12', '11', '10', '9', '8', '7', '6', '5', '4', '3', '2' ];
+    const ROYALTY_TO_INT = [
+      'a' => '14',
+      'k' => '13',
+      'q' => '12',
+      'j' => '11',
+    ];
 
     public $pair_count;
     public $three_count;
@@ -53,24 +59,37 @@ class PokerHand
 
         foreach ($hand as $card) {
             $length = strlen($card) - 1;
+            $suit = $card[strlen($card) - 1];
+            $card = substr($card, 0, $length);
+            $card = $this->convertRoyaltyToInt($card);
             $cards[] = [
-                'card' => substr($card, 0, $length),
-                'suit' => $card[strlen($card) - 1]
+                'card' => $card,
+                'suit' => $suit
             ];
         }
-
+        array_multisort($cards, SORT_DESC);
         $this->cards = $cards;
+    }
+
+    public function convertRoyaltyToInt($card): string
+    {
+        $card = strtolower($card);
+        if(isset(self::ROYALTY_TO_INT[$card])) {
+            return self::ROYALTY_TO_INT[$card];
+        } else {
+            return $card;
+        }
     }
 
     public function isHandFlush(): bool
     {
-      $flush_suit = $this->suitString()[0];
-      foreach ($this->suitColumn() as $suit) {
-        if ($suit !== $flush_suit) {
-          return false;
+        $flush_suit = $this->suitString()[0];
+        foreach ($this->suitColumn() as $suit) {
+            if ($suit !== $flush_suit) {
+                return false;
+            }
         }
-      }
-      return true;
+        return true;
     }
 
     public function isHandStraight()
